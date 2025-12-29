@@ -57,14 +57,14 @@ This documentation describes the complete setup for creating a Ctrl+Shift+T glob
 
 **SSH Connection Details:**
 ```bash
-ssh -t -o BatchMode=yes -o ConnectTimeout=2 root@ubuntu58-1 "cd /media/docker && ls -la .opencode/sessions 2>/dev/null || echo 'No sessions found'; bash"
+ssh -t -o BatchMode=yes -o ConnectTimeout=2 root@ubuntu58-1 "cd /media/docker && /root/.opencode/bin/opencode session; bash"
 ```
 
 **What it does:**
-1. Lists all available opencode sessions by displaying the `.opencode/sessions` directory contents
-2. Shows detailed information about each session file
-3. If no sessions exist, displays "No sessions found"
-4. Provides bash shell fallback for additional commands
+1. Connects to ubuntu58-1 as root with interactive TTY support
+2. Changes to `/media/docker` directory
+3. Runs `opencode session` to list available sessions
+4. Provides bash shell fallback for additional commands after exiting opencode
 
 **Features:**
 - SSH key authentication as primary method (passwordless)
@@ -178,16 +178,16 @@ $shortcut.Hotkey = "CTRL+SHIFT+T"  # Change to desired hotkey
 
 Edit [`connect-ubuntu58-1-opencode.bat`](connect-ubuntu58-1-opencode.bat):
 ```batch
-ssh -t -o BatchMode=yes -o ConnectTimeout=2 root@ubuntu58-1 "cd /media/docker && /root/.opencode/bin/opencode --list-sessions; bash"
+ssh -t -o BatchMode=yes -o ConnectTimeout=2 root@ubuntu58-1 "cd /media/docker && /root/.opencode/bin/opencode session; bash"
 ```
 
-Use `--list-sessions` to show available sessions, or replace with other opencode flags as needed.
+Use `session` to list available sessions, or replace with other opencode commands as needed.
 
 ### Change the working directory
 
 Edit [`connect-ubuntu58-1-opencode.bat`](connect-ubuntu58-1-opencode.bat):
 ```batch
-ssh -t -o BatchMode=yes -o ConnectTimeout=2 root@ubuntu58-1 "cd /your/desired/path && /root/.opencode/bin/opencode /sessions; bash"
+ssh -t -o BatchMode=yes -o ConnectTimeout=2 root@ubuntu58-1 "cd /your/desired/path && /root/.opencode/bin/opencode session; bash"
 ```
 
 ### Change the target host or user
