@@ -5,11 +5,11 @@ REM SSH keys should be configured for passwordless authentication
 REM Password authentication is used only as fallback
 
 REM Try SSH connection with keys (passwordless) - use -t for interactive session
-REM Change to /media/docker directory before running opencode --list-sessions
-REM Fallback to bash shell after opencode exits (including Ctrl+C)
-ssh -t -o BatchMode=yes -o ConnectTimeout=2 root@ubuntu58-1 "cd /media/docker && /root/.opencode/bin/opencode --list-sessions; bash"
+REM Change to /media/docker directory before listing opencode sessions
+REM Fallback to bash shell after listing sessions
+ssh -t -o BatchMode=yes -o ConnectTimeout=2 root@ubuntu58-1 "cd /media/docker && ls -la .opencode/sessions 2>/dev/null || echo 'No sessions found'; bash"
 
 REM If SSH keys failed, try with password authentication
 if %ERRORLEVEL% NEQ 0 (
-    ssh -t root@ubuntu58-1 "cd /media/docker && /root/.opencode/bin/opencode --list-sessions; bash"
+    ssh -t root@ubuntu58-1 "cd /media/docker && ls -la .opencode/sessions 2>/dev/null || echo 'No sessions found'; bash"
 )

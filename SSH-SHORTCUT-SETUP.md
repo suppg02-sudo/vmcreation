@@ -57,13 +57,14 @@ This documentation describes the complete setup for creating a Ctrl+Shift+T glob
 
 **SSH Connection Details:**
 ```bash
-ssh -t -o BatchMode=yes -o ConnectTimeout=2 root@ubuntu58-1 "cd /media/docker && /root/.opencode/bin/opencode --list-sessions; bash"
+ssh -t -o BatchMode=yes -o ConnectTimeout=2 root@ubuntu58-1 "cd /media/docker && ls -la .opencode/sessions 2>/dev/null || echo 'No sessions found'; bash"
 ```
 
 **What it does:**
-1. Lists all available opencode sessions with `--list-sessions` flag
-2. Displays session information allowing you to select or create a new session
-3. Provides bash shell fallback for additional commands
+1. Lists all available opencode sessions by displaying the `.opencode/sessions` directory contents
+2. Shows detailed information about each session file
+3. If no sessions exist, displays "No sessions found"
+4. Provides bash shell fallback for additional commands
 
 **Features:**
 - SSH key authentication as primary method (passwordless)
