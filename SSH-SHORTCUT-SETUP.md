@@ -57,8 +57,13 @@ This documentation describes the complete setup for creating a Ctrl+Shift+T glob
 
 **SSH Connection Details:**
 ```bash
-ssh -t -o BatchMode=yes -o ConnectTimeout=2 root@ubuntu58-1 "cd /media/docker && /root/.opencode/bin/opencode; bash"
+ssh -t -o BatchMode=yes -o ConnectTimeout=2 root@ubuntu58-1 "cd /media/docker && /root/.opencode/bin/opencode --list-sessions; bash"
 ```
+
+**What it does:**
+1. Lists all available opencode sessions with `--list-sessions` flag
+2. Displays session information allowing you to select or create a new session
+3. Provides bash shell fallback for additional commands
 
 **Features:**
 - SSH key authentication as primary method (passwordless)
@@ -168,11 +173,20 @@ Edit [`register-shortcut.ps1`](register-shortcut.ps1) line 32:
 $shortcut.Hotkey = "CTRL+SHIFT+T"  # Change to desired hotkey
 ```
 
+### Change the opencode arguments
+
+Edit [`connect-ubuntu58-1-opencode.bat`](connect-ubuntu58-1-opencode.bat):
+```batch
+ssh -t -o BatchMode=yes -o ConnectTimeout=2 root@ubuntu58-1 "cd /media/docker && /root/.opencode/bin/opencode --list-sessions; bash"
+```
+
+Use `--list-sessions` to show available sessions, or replace with other opencode flags as needed.
+
 ### Change the working directory
 
 Edit [`connect-ubuntu58-1-opencode.bat`](connect-ubuntu58-1-opencode.bat):
 ```batch
-ssh -t -o BatchMode=yes -o ConnectTimeout=2 root@ubuntu58-1 "cd /your/desired/path && /root/.opencode/bin/opencode; bash"
+ssh -t -o BatchMode=yes -o ConnectTimeout=2 root@ubuntu58-1 "cd /your/desired/path && /root/.opencode/bin/opencode /sessions; bash"
 ```
 
 ### Change the target host or user
