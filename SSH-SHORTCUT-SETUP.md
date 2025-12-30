@@ -50,19 +50,19 @@ This documentation describes the complete setup for creating a Ctrl+Shift+T glob
    - `-t` flag for interactive TTY allocation
    - `-o BatchMode=yes` for key-based authentication (passwordless)
    - `-o ConnectTimeout=2` for quick timeout on key failure
-2. Changes directory to `/media/docker` on the remote machine
+2. Changes directory to `/media/docker/commands` on the remote machine
 3. Executes `/root/.opencode/bin/opencode` for interactive development
 4. Falls back to password authentication if SSH keys fail
 5. Starts a bash shell after opencode exits (allows continued CLI work after Ctrl+C)
 
 **SSH Connection Details:**
 ```bash
-ssh -t -o BatchMode=yes -o ConnectTimeout=2 root@ubuntu58-1 "cd /media/docker && /root/.opencode/bin/opencode; bash"
+ssh -t -o BatchMode=yes -o ConnectTimeout=2 root@ubuntu58-1 "cd /media/docker/commands && /root/.opencode/bin/opencode; bash"
 ```
 
 **What it does:**
 1. Connects to ubuntu58-1 as root with interactive TTY support
-2. Changes to `/media/docker` directory
+2. Changes to `/media/docker/commands` directory
 3. Runs `opencode` for interactive development
 4. Provides bash shell fallback for additional commands after exiting opencode
 
@@ -112,7 +112,7 @@ ssh -t -o BatchMode=yes -o ConnectTimeout=2 root@ubuntu58-1 "cd /media/docker &&
 5. **Test the shortcut**
    - Press **Ctrl+Shift+T** anywhere on your desktop
    - A terminal window should open and SSH into ubuntu58-1
-   - The working directory will be `/media/docker`
+   - The working directory will be `/media/docker/commands`
    - Opencode should launch automatically
 
 ### Post-Setup
@@ -187,8 +187,10 @@ Replace with other opencode commands or arguments as needed.
 
 Edit [`connect-ubuntu58-1-opencode.bat`](connect-ubuntu58-1-opencode.bat):
 ```batch
-ssh -t -o BatchMode=yes -o ConnectTimeout=2 root@ubuntu58-1 "cd /your/desired/path && /root/.opencode/bin/opencode; bash"
+ssh -t -o BatchMode=yes -o ConnectTimeout=2 root@ubuntu58-1 "cd /media/docker/commands && /root/.opencode/bin/opencode; bash"
 ```
+
+Replace `/media/docker/commands` with your desired working directory.
 
 ### Change the target host or user
 
@@ -203,7 +205,7 @@ ssh -t -o BatchMode=yes -o ConnectTimeout=2 youruser@yourhost "cd /media/docker 
 
 The complete setup provides a seamless global keyboard shortcut (Ctrl+Shift+T) that:
 - Connects to ubuntu58-1 as root via SSH (using key authentication)
-- Automatically changes to `/media/docker` directory
+- Automatically changes to `/media/docker/commands` directory
 - Launches opencode for interactive development
 - Provides bash shell fallback for additional commands
 - Falls back to password authentication if needed
