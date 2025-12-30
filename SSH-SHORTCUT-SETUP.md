@@ -51,19 +51,19 @@ This documentation describes the complete setup for creating a Ctrl+Shift+T glob
    - `-o BatchMode=yes` for key-based authentication (passwordless)
    - `-o ConnectTimeout=2` for quick timeout on key failure
 2. Changes directory to `/media/docker` on the remote machine
-3. Executes `/root/.opencode/bin/opencode`
+3. Executes `/root/.opencode/bin/opencode` for interactive development
 4. Falls back to password authentication if SSH keys fail
 5. Starts a bash shell after opencode exits (allows continued CLI work after Ctrl+C)
 
 **SSH Connection Details:**
 ```bash
-ssh -t -o BatchMode=yes -o ConnectTimeout=2 root@ubuntu58-1 "cd /media/docker && /root/.opencode/bin/opencode session; bash"
+ssh -t -o BatchMode=yes -o ConnectTimeout=2 root@ubuntu58-1 "cd /media/docker && /root/.opencode/bin/opencode; bash"
 ```
 
 **What it does:**
 1. Connects to ubuntu58-1 as root with interactive TTY support
 2. Changes to `/media/docker` directory
-3. Runs `opencode session` to list available sessions
+3. Runs `opencode` for interactive development
 4. Provides bash shell fallback for additional commands after exiting opencode
 
 **Features:**
@@ -178,16 +178,16 @@ $shortcut.Hotkey = "CTRL+SHIFT+T"  # Change to desired hotkey
 
 Edit [`connect-ubuntu58-1-opencode.bat`](connect-ubuntu58-1-opencode.bat):
 ```batch
-ssh -t -o BatchMode=yes -o ConnectTimeout=2 root@ubuntu58-1 "cd /media/docker && /root/.opencode/bin/opencode session; bash"
+ssh -t -o BatchMode=yes -o ConnectTimeout=2 root@ubuntu58-1 "cd /media/docker && /root/.opencode/bin/opencode; bash"
 ```
 
-Use `session` to list available sessions, or replace with other opencode commands as needed.
+Replace with other opencode commands or arguments as needed.
 
 ### Change the working directory
 
 Edit [`connect-ubuntu58-1-opencode.bat`](connect-ubuntu58-1-opencode.bat):
 ```batch
-ssh -t -o BatchMode=yes -o ConnectTimeout=2 root@ubuntu58-1 "cd /your/desired/path && /root/.opencode/bin/opencode session; bash"
+ssh -t -o BatchMode=yes -o ConnectTimeout=2 root@ubuntu58-1 "cd /your/desired/path && /root/.opencode/bin/opencode; bash"
 ```
 
 ### Change the target host or user
