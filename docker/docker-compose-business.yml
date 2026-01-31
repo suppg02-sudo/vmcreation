@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+  homarr:
+    image: ghcr.io/homarr-labs/homarr:latest
+    container_name: homarr-business
+    ports:
+      - "7575:7575"
+    volumes:
+      - /media/docker/homarr:/app/data
+    restart: unless-stopped
+    networks:
+      - business-network
+
+  nocodb:
+    image: nocodb/nocodb:latest
+    container_name: nocodb
+    ports:
+      - "8080:8080"
+    environment:
+      - NC_DB=sqlite3:///data/nocodb.db
+    volumes:
+      - ./nocodb/data:/usr/app/data
+    restart: unless-stopped
+    networks:
+      - business-network
+
+  nginx-proxy-manager:
+    image: jc21/nginx-proxy-manager
+    container_name: nginx-proxy-manager
+    ports:
+      - "80:80"
+      - "81:81"
+      - "443:443"
+    volumes:
+      - /media/docker/proxy/data:/data
+      - /media/docker/proxy/lets:/etc/letsencrypt
+    restart: unless-stopped
+    networks:
+      - business-network
+
+  n8n:
+    image: n8nio/n8n
+    container_name: n8n
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=suppg02
+      - N8N_BASIC_AUTH_PASSWORD=Mu02ckca
+      - N8N_HOST=ubhost3
+      - N8N_PORT=5678
+    volumes:
+      - /media/docker/n8n:/home/node/.n8n
+    restart: unless-stopped
+    networks:
+      - business-network
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus/data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    restart: unless-stopped
+    networks:
+      - business-network
+
+networks:
+  business-network:
+    driver: bridge
+
+# Prometheus configuration will be created automatically
+# Nginx configuration will be created automatically
+
+# Usage:
+# 1. cd ~/docker/business
+# 2. docker-compose up -d
+# 3. Access services:
+#    - Homarr Dashboard: http://VM_IP:7575
+#    - NocoDB Database: http://VM_IP:8080
+#    - Nginx Web Server: http://VM_IP
+#    - Prometheus: http://VM_IP:9090

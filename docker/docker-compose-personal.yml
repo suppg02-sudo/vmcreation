@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  homarr:
+    image: ghcr.io/homarr-labs/homarr:latest
+    container_name: homarr
+    ports:
+      - "7575:7575"
+    volumes:
+      - /media/docker/homarr:/app/data
+    restart: unless-stopped
+    networks:
+      - personal-network
+
+  dockplay:
+    image: dockplay/dockplay:latest
+    container_name: dockplay
+    ports:
+      - "8080:8080"
+    environment:
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - ./dockplay/config:/config
+      - ./dockplay/media:/media
+    restart: unless-stopped
+    networks:
+      - personal-network
+
+  filebrowser:
+    image: filebrowser/filebrowser:latest
+    container_name: filebrowser
+    ports:
+      - "8070:80"
+    volumes:
+      - /:/srv
+    restart: unless-stopped
+    networks:
+      - personal-network
+
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    ports:
+      - "9000:8000"
+      - "9443:9443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /media/docker/portainer:/data
+    environment:
+      - EDGE=1
+      - EDGE_ID=10.2.1.183
+    restart: always
+    networks:
+      - personal-network
+
+networks:
+  personal-network:
+    driver: bridge
+
+# Usage:
+# 1. cd ~/docker/personal
+# 2. docker-compose up -d
+# 3. Access services:
+#    - Homarr: http://VM_IP:7575
+#    - Dockplay: http://VM_IP:8080
+#    - Filebrowser: http://VM_IP:8081
+#    - Portainer: http://VM_IP:9000

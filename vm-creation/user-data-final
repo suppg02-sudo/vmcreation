@@ -1,0 +1,168 @@
+#cloud-config
+# Simplified SSH configuration for guaranteed access
+
+# Enable password authentication
+ssh_pwauth: true
+
+# Set root password - multiple methods for reliability
+chpasswd:
+  expire: false
+  list: |
+    root:Passw0rd
+
+# Ensure root user exists with password
+users:
+  - name: root
+    passwd: "$6$salt$hashed_password_here"
+    lock_passwd: false
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    shell: /bin/bash
+
+# Update packages and install SSH + Docker
+package_update: true
+package_upgrade: true
+packages:
+  - openssh-server
+  - curl
+  - net-tools
+  - apt-transport-https
+  - ca-certificates
+  - gnupg
+  - lsb-release
+  - wget
+  - jq
+
+
+# Configure services
+runcmd:
+  # Set root password - multiple methods for reliability
+  - echo "root:Passw0rd" | chpasswd
+  - usermod -p '$6$salt$encrypted_password' root 2>/dev/null || true
+
+  # Enable and start SSH
+  - systemctl daemon-reload
+  - systemctl enable ssh
+  - systemctl start ssh
+
+  # Configure SSH - direct file write for reliability
+  - |
+    cat > /etc/ssh/sshd_config << 'EOF'
+    Port 22
+    Protocol 2
+    HostKey /etc/ssh/ssh_host_rsa_key
+    HostKey /etc/ssh/ssh_host_ecdsa_key
+    HostKey /etc/ssh/ssh_host_ed25519_key
+    UsePrivilegeSeparation yes
+    KeyRegenerationInterval 3600
+    ServerKeyBits 1024
+    SyslogFacility AUTH
+    LogLevel INFO
+    LoginGraceTime 120
+    PermitRootLogin yes
+    StrictModes yes
+    RSAAuthentication yes
+    PubkeyAuthentication yes
+    IgnoreRhosts yes
+    RhostsRSAAuthentication no
+    HostbasedAuthentication no
+    PermitEmptyPasswords no
+    ChallengeResponseAuthentication no
+    PasswordAuthentication yes
+    X11Forwarding yes
+    X11DisplayOffset 10
+    PrintMotd no
+    PrintLastLog yes
+    TCPKeepAlive yes
+    UsePAM yes
+    Subsystem sftp /usr/lib/openssh/sftp-server
+    EOF
+
+  # Restart SSH to apply changes
+  - systemctl restart ssh
+
+  # Install Docker
+  - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+  - echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+  - apt-get update
+  - apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+  - systemctl start docker
+  - systemctl enable docker
+  - usermod -aG docker root
+
+  # Copy build selector scripts (they should be included in cloud-init)
+  - mkdir -p /root/scripts
+  - |
+    # Copy scripts if they exist in the cloud-init working directory
+    if [[ -f "/build-selector.sh" ]]; then
+        cp /build-selector.sh /root/scripts/build-selector.sh
+    fi
+    if [[ -f "/docker-setup.sh" ]]; then
+        cp /docker-setup.sh /root/scripts/docker-setup.sh
+    fi
+    if [[ -f "/post-ssh-setup.sh" ]]; then
+        cp /post-ssh-setup.sh /root/scripts/post-ssh-setup.sh
+    fi
+    chmod +x /root/scripts/*.sh 2>/dev/null || true
+
+  # Create post-login script
+  - cat > /root/.bashrc.d/build-selector.sh << 'EOF'
+#!/bin/bash
+# Auto-run build selector on first login
+
+BUILD_SELECTED_FILE="$HOME/.build_selected"
+
+if [[ ! -f "$BUILD_SELECTED_FILE" ]]; then
+    echo
+    echo "=========================================="
+    echo "  Welcome to your Ubuntu VM!"
+    echo "=========================================="
+    echo
+    echo "Docker has been installed and is ready."
+    echo "Let's set up your container environment."
+    echo
+    read -p "Press Enter to continue to build selection..."
+    echo
+
+    if [[ -f "/root/scripts/build-selector.sh" ]]; then
+        /root/scripts/build-selector.sh
+        touch "$BUILD_SELECTED_FILE"
+        echo
+        echo "Build setup complete! Your containers are running."
+        echo "You can manage them anytime by running: ~/scripts/build-selector.sh"
+    else
+        echo "Build selector script not found. You can download it manually."
+    fi
+    echo
+fi
+EOF
+  - chmod +x /root/.bashrc.d/build-selector.sh
+
+  # Test SSH is working
+  - systemctl is-active ssh
+
+  # Show final status
+  - echo "=== Ubuntu VM Setup Complete ==="
+  - echo "Root password set to: Passw0rd"
+  - echo "SSH status: $(systemctl is-active ssh)"
+  - echo "Docker status: $(systemctl is-active docker)"
+  - echo "PermitRootLogin: $(grep PermitRootLogin /etc/ssh/sshd_config | grep -v '^#')"
+  - echo "PasswordAuthentication: $(grep PasswordAuthentication /etc/ssh/sshd_config | grep -v '^#')"
+  - echo ""
+  - echo "On first SSH login, you'll be prompted to select a build type."
+  - echo "Available builds: Personal (Homarr, Dockplay, Filebrowser, Portainer)"
+  - echo "                  Business (Homarr, NocoDB, Nginx, Prometheus)"
+  - echo "                  Custom (Start with empty setup)"
+
+# Final message
+final_message: |
+  ========================================
+  UBUNTU VM SETUP COMPLETE
+  ========================================
+  Root Login: ENABLED
+  Password: Passw0rd
+  SSH: CONFIGURED
+  ========================================
+  You can now login with:
+  ssh root@<VM_IP>
+  Password: Passw0rd
+  ========================================

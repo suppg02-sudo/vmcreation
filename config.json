@@ -1,0 +1,59 @@
+{
+  "version": "1.0.0",
+  "lastUpdated": "2025-12-27",
+  "description": "Unified configuration for VMCreation project - Hyper-V VM automation and backup",
+  "backup": {
+    "server": "srvdocker02",
+    "user": "usdaw",
+    "passwordEnvVar": "BACKUP_SERVER_PASSWORD",
+    "backupRoot": "/media/backup",
+    "sshKeyPath": "~/.ssh/id_rsa",
+    "note": "Set environment variable BACKUP_SERVER_PASSWORD=3C5x9cfg or use SSH keys"
+  },
+  "vm": {
+    "defaultName": "ubuntu58",
+    "defaultMemoryGB": 4,
+    "defaultCPUs": 2,
+    "defaultOSDiskGB": 50,
+    "defaultDataDiskGB": 1024,
+    "ubuntuVersion": "24.04",
+    "defaultSwitch": "External Switch"
+  },
+  "restic": {
+    "path": "C:\\Restic\\restic.exe",
+    "passwordEnvVar": "RESTIC_PASSWORD",
+    "retention": {
+      "daily": 7,
+      "weekly": 4,
+      "monthly": 6
+    },
+    "compression": "auto",
+    "note": "Set environment variable RESTIC_PASSWORD for repository encryption"
+  },
+  "borg": {
+    "repoPath": "ssh://usdaw@srvdocker02/~/ubuntu58-backups",
+    "passphraseFile": "/root/.borg-passphrase",
+    "retention": {
+      "daily": 7,
+      "weekly": 4,
+      "monthly": 12
+    }
+  },
+  "borgWindows": {
+    "path": "C:\\Program Files\\Borg\\borg.exe",
+    "repoFormat": "user@server:/path/vm-name-borg-vhd",
+    "passphraseEnvVar": "BORG_PASSPHRASE",
+    "compression": "lz4",
+    "retention": {
+      "daily": 7,
+      "weekly": 4,
+      "monthly": 6
+    },
+    "note": "Alternative to Restic for image-level VHD backups from Windows host"
+  },
+  "paths": {
+    "vmRoot": "C:\\VMs",
+    "imageCache": "C:\\VMs\\images",
+    "logDirectory": "C:\\VMs\\logs"
+  }
+}

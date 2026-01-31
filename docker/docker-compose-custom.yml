@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  # Add your custom containers here
+  # Examples:
+
+  # Web Server Example
+  # nginx:
+  #   image: nginx:alpine
+  #   ports:
+  #     - "80:80"
+  #   volumes:
+  #     - ./nginx/html:/usr/share/nginx/html
+  #     - ./nginx/conf.d:/etc/nginx/conf.d
+  #   restart: unless-stopped
+
+  # Database Example
+  # postgres:
+  #   image: postgres:15-alpine
+  #   environment:
+  #     POSTGRES_DB: mydb
+  #     POSTGRES_USER: myuser
+  #     POSTGRES_PASSWORD: mypassword
+  #   volumes:
+  #     - ./postgres/data:/var/lib/postgresql/data
+  #   ports:
+  #     - "5432:5432"
+  #   restart: unless-stopped
+
+  # Application Example
+  # myapp:
+  #   image: myapp:latest
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     - NODE_ENV=production
+  #   volumes:
+  #     - ./myapp/data:/app/data
+  #   depends_on:
+  #     - postgres
+  #   restart: unless-stopped
+
+networks:
+  custom-network:
+    driver: bridge
+
+# Instructions:
+# 1. Uncomment and modify the services you need
+# 2. Add your own containers following the examples
+# 3. Run: docker-compose up -d
+# 4. Access your services via the exposed ports
+#
+# Common patterns:
+# - Web apps: ports 3000, 8080, 5000
+# - Databases: ports 5432 (PostgreSQL), 3306 (MySQL), 27017 (MongoDB)
+# - Admin panels: ports 8080, 9000
+# - Monitoring: ports 9090 (Prometheus), 3000 (Grafana)

@@ -1,0 +1,34 @@
+﻿# VM files
+*.vhdx
+*.vhd
+*.img
+C:\VMs\
+
+# Logs
+*.log
+*_log.txt
+
+# Temporary files
+*.tmp
+*.temp
+*~
+
+# OS specific
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Backup files
+*.bak
+*.bak2
+backup-files/
+
+# Archives
+archive/
