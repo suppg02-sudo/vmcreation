@@ -2,6 +2,25 @@
 
 This guide provides step-by-step instructions for installing Open Code on Windows and setting up the Open Agents Control plugin.
 
+## Quick Start (Bash Commands)
+
+If you have Git Bash or WSL installed, you can use these bash commands to set up Open Code:
+
+```bash
+# Clone the repository (if not already done)
+git clone <repository-url>
+cd vmcreation
+
+# Run the automated setup (requires Administrator privileges)
+# Right-click setup-opencode.bat and select "Run as administrator"
+# Or run from PowerShell as Administrator:
+powershell -ExecutionPolicy Bypass -File .\setup-opencode.bat
+
+# Or install components individually:
+powershell -ExecutionPolicy Bypass -File .\install-opencode.ps1
+powershell -ExecutionPolicy Bypass -File .\install-openagents-plugin.ps1
+```
+
 ## Table of Contents
 
 1. [Prerequisites](#prerequisites)
