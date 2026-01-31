@@ -43,6 +43,23 @@ $CidVHDXPath = "$VMPath\cidata.vhdx"
 $DataVHDXPath = "$VMPath\data.vhdx"
 $SwitchName = "New Virtual Switch"
 
+# Check for QEMU installation
+$QemuImgPath = "C:\Program Files\qemu\qemu-img.exe"
+if (!(Test-Path $QemuImgPath)) {
+    # Try common alternative locations
+    $QemuImgPath = "C:\Program Files (x86)\qemu\qemu-img.exe"
+    if (!(Test-Path $QemuImgPath)) {
+        # Try PATH
+        $QemuInPath = Get-Command qemu-img.exe -ErrorAction SilentlyContinue
+        if ($QemuInPath) {
+            $QemuImgPath = $QemuInPath.Source
+        } else {
+            Write-Error "QEMU is not installed. Please install QEMU from https://www.qemu.org/download/#windows"
+            exit 1
+        }
+    }
+}
+
 # Create directories
 if (!(Test-Path $VMPath)) { New-Item -ItemType Directory -Path $VMPath }
 if (!(Test-Path "C:\VMs\images")) { New-Item -ItemType Directory -Path "C:\VMs\images" }
@@ -61,10 +78,10 @@ if ($downloadImage) {
     Invoke-WebRequest -Uri $ImageUrl -OutFile $ImageCache -ErrorAction Stop
 }
 
-# Convert to VHDX
+# Convert to VHDX using QEMU
 Write-Host "Converting image to VHDX..."
 if (Test-Path $OsVHDXPath) { Remove-Item $OsVHDXPath -Force }
-Start-Process -FilePath "C:\Program Files\qemu\qemu-img.exe" -ArgumentList "convert", "-O", "vhdx", "-o", "subformat=dynamic", $ImageCache, $OsVHDXPath -Wait -NoNewWindow
+Start-Process -FilePath $QemuImgPath -ArgumentList "convert", "-O", "vhdx", "-o", "subformat=dynamic", $ImageCache, $OsVHDXPath -Wait -NoNewWindow
 
 # Ensure VHDX is uncompressed and not sparse
 Write-Host "Optimizing VHDX file..."
