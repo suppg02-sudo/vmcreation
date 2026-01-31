@@ -1,10 +1,13 @@
 # Open Code Automated Installation Script
 # Run as Administrator
-# Version: 1.0
+# Version: 2.0
 # Last Updated: 2026-01-31
 
 param(
-    [switch]$SkipVerification = $false
+    [switch]$SkipVerification = $false,
+    [switch]$Silent = $false,
+    [switch]$NoLaunch = $false,
+    [switch]$Force = $false
 )
 
 $ErrorActionPreference = "Stop"
@@ -15,7 +18,9 @@ function Write-ColorOutput {
         [string]$Message,
         [string]$Color = "White"
     )
-    Write-Host $Message -ForegroundColor $Color
+    if (-not $Silent) {
+        Write-Host $Message -ForegroundColor $Color
+    }
 }
 
 function Test-Administrator {
@@ -24,22 +29,93 @@ function Test-Administrator {
     return $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 }
 
+function Request-AdministratorPrivileges {
+    # Check if we're already running as admin
+    if (Test-Administrator) {
+        return $true
+    }
+
+    # Relaunch the script with administrator privileges
+    $psi = New-Object System.Diagnostics.ProcessStartInfo
+    $psi.FileName = "powershell.exe"
+    $psi.Arguments = "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`""
+    
+    # Pass through existing parameters
+    if ($SkipVerification) { $psi.Arguments += " -SkipVerification" }
+    if ($Silent) { $psi.Arguments += " -Silent" }
+    if ($NoLaunch) { $psi.Arguments += " -NoLaunch" }
+    if ($Force) { $psi.Arguments += " -Force" }
+    
+    $psi.Verb = "RunAs"
+    $psi.UseShellExecute = $true
+
+    try {
+        $process = [System.Diagnostics.Process]::Start($psi)
+        $process.WaitForExit()
+        return $process.ExitCode -eq 0
+    }
+    catch {
+        return $false
+    }
+}
+
+function Refresh-EnvironmentVariables {
+    # Refresh environment variables for the current session
+    $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + 
+    [System.Environment]::GetEnvironmentVariable("Path", "User")
+    
+    # Broadcast environment change to other processes
+    if (-not $Silent) {
+        Write-ColorOutput "  ✓ Environment variables refreshed" "Green"
+    }
+}
+
+function Create-DesktopShortcut {
+    $WshShell = New-Object -ComObject WScript.Shell
+    $desktopPath = [Environment]::GetFolderPath("Desktop")
+    $shortcutPath = Join-Path $desktopPath "Open Code.lnk"
+    $targetPath = "C:\Program Files\Open Code\opencode.exe"
+
+    if (-not (Test-Path $targetPath)) {
+        $targetPath = "C:\Program Files (x86)\Open Code\opencode.exe"
+    }
+
+    if (Test-Path $targetPath) {
+        $shortcut = $WshShell.CreateShortcut($shortcutPath)
+        $shortcut.TargetPath = $targetPath
+        $shortcut.WorkingDirectory = Split-Path $targetPath
+        $shortcut.Description = "Open Code - Open Source Code Editor"
+        $shortcut.Save()
+        
+        if (-not $Silent) {
+            Write-ColorOutput "  ✓ Desktop shortcut created" "Green"
+        }
+        return $true
+    }
+    return $false
+}
+
 function Install-OpenCode {
     Write-ColorOutput "==========================================" "Cyan"
-    Write-ColorOutput "   Open Code Installation Script" "Cyan"
+    Write-ColorOutput "   Open Code Installation Script v2.0" "Cyan"
     Write-ColorOutput "==========================================" "Cyan"
     Write-Host ""
 
-    # Check administrator privileges
+    # Auto-elevate if not running as administrator
     if (-not (Test-Administrator)) {
-        Write-ColorOutput "ERROR: This script must be run as Administrator!" "Red"
-        Write-Host ""
-        Write-Host "Please:"
-        Write-Host "  1. Right-click on PowerShell"
-        Write-Host "  2. Select 'Run as Administrator'"
-        Write-Host "  3. Navigate to this script and run it again"
-        Write-Host ""
-        exit 1
+        Write-ColorOutput "Requesting administrator privileges..." "Yellow"
+        if (Request-AdministratorPrivileges) {
+            exit 0
+        }
+        else {
+            Write-ColorOutput "ERROR: Could not obtain administrator privileges!" "Red"
+            Write-Host ""
+            Write-Host "Please:"
+            Write-Host "  1. Right-click on this script"
+            Write-Host "  2. Select 'Run as Administrator'"
+            Write-Host ""
+            exit 1
+        }
     }
 
     Write-ColorOutput "✓ Administrator privileges confirmed" "Green"
@@ -47,13 +123,25 @@ function Install-OpenCode {
 
     # Check if Open Code is already installed
     $opencodePath = "C:\Program Files\Open Code\opencode.exe"
-    if (Test-Path $opencodePath) {
+    if (-not (Test-Path $opencodePath)) {
+        $opencodePath = "C:\Program Files (x86)\Open Code\opencode.exe"
+    }
+
+    if (Test-Path $opencodePath -and -not $Force) {
         Write-ColorOutput "Open Code is already installed at: $opencodePath" "Yellow"
-        $reinstall = Read-Host "Do you want to reinstall? (y/N)"
-        if ($reinstall -ne "y" -and $reinstall -ne "Y") {
-            Write-Host "Installation cancelled."
+        
+        if (-not $Silent) {
+            $reinstall = Read-Host "Do you want to reinstall? (y/N)"
+            if ($reinstall -ne "y" -and $reinstall -ne "Y") {
+                Write-Host "Installation cancelled."
+                exit 0
+            }
+        }
+        else {
+            Write-ColorOutput "Use -Force to reinstall in silent mode" "Yellow"
             exit 0
         }
+        
         Write-ColorOutput "Proceeding with reinstallation..." "Yellow"
     }
 
@@ -63,10 +151,15 @@ function Install-OpenCode {
     $installerPath = "$env:TEMP\OpenCodeSetup.exe"
 
     try {
-        Write-Host "  Downloading from: $downloadUrl"
+        if (-not $Silent) {
+            Write-Host "  Downloading from: $downloadUrl"
+        }
+        
         $progressPreference = 'SilentlyContinue'
-        Invoke-WebRequest -Uri $downloadUrl -OutFile $installerPath -UseBasicParsing
+        $webClient = New-Object System.Net.WebClient
+        $webClient.DownloadFile($downloadUrl, $installerPath)
         $progressPreference = 'Continue'
+        
         Write-ColorOutput "  ✓ Download completed" "Green"
     }
     catch {
@@ -82,7 +175,9 @@ function Install-OpenCode {
         Write-ColorOutput "Step 2: Verifying downloaded installer..." "Cyan"
         if (Test-Path $installerPath) {
             $fileSize = (Get-Item $installerPath).Length / 1MB
-            Write-Host "  File size: $([math]::Round($fileSize, 2)) MB"
+            if (-not $Silent) {
+                Write-Host "  File size: $([math]::Round($fileSize, 2)) MB"
+            }
             Write-ColorOutput "  ✓ Installer file verified" "Green"
         }
         else {
@@ -95,11 +190,13 @@ function Install-OpenCode {
 
     # Install Open Code
     Write-ColorOutput "Step 3: Installing Open Code..." "Cyan"
-    Write-Host "  This may take a few minutes..."
-    Write-Host ""
+    if (-not $Silent) {
+        Write-Host "  This may take a few minutes..."
+        Write-Host ""
+    }
 
     try {
-        $process = Start-Process -FilePath $installerPath -ArgumentList "/silent", "/mergetasks=!runcode" -Wait -PassThru
+        $process = Start-Process -FilePath $installerPath -ArgumentList "/silent", "/mergetasks=!runcode,addcontextmenufiles,addcontextmenufolders,associatewithfiles,addtopath" -Wait -PassThru
         if ($process.ExitCode -eq 0) {
             Write-ColorOutput "  ✓ Installation completed successfully" "Green"
         }
@@ -119,7 +216,7 @@ function Install-OpenCode {
     # Clean up
     Write-ColorOutput "Step 4: Cleaning up..." "Cyan"
     try {
-        Remove-Item $installerPath -Force
+        Remove-Item $installerPath -Force -ErrorAction SilentlyContinue
         Write-ColorOutput "  ✓ Temporary files removed" "Green"
     }
     catch {
@@ -128,25 +225,48 @@ function Install-OpenCode {
 
     Write-Host ""
 
+    # Refresh environment variables
+    Write-ColorOutput "Step 5: Refreshing environment variables..." "Cyan"
+    Refresh-EnvironmentVariables
+
+    Write-Host ""
+
+    # Create desktop shortcut
+    Write-ColorOutput "Step 6: Creating desktop shortcut..." "Cyan"
+    Create-DesktopShortcut
+
+    Write-Host ""
+
     # Verify installation
-    Write-ColorOutput "Step 5: Verifying installation..." "Cyan"
+    Write-ColorOutput "Step 7: Verifying installation..." "Cyan"
+    
+    # Re-check for Open Code in both locations
+    $opencodePath = "C:\Program Files\Open Code\opencode.exe"
+    if (-not (Test-Path $opencodePath)) {
+        $opencodePath = "C:\Program Files (x86)\Open Code\opencode.exe"
+    }
+
     if (Test-Path $opencodePath) {
         Write-ColorOutput "  ✓ Open Code installed successfully!" "Green"
         Write-Host ""
-        Write-ColorOutput "Installation Summary:" "Cyan"
-        Write-Host "  Location: $opencodePath"
-        Write-Host "  Version:  $(& $opencodePath --version 2>$null)"
-        Write-Host ""
-        Write-ColorOutput "Next Steps:" "Cyan"
-        Write-Host "  1. Launch Open Code from the Start menu"
-        Write-Host "  2. Install the Open Agents Control plugin:"
-        Write-Host "     - Press Ctrl+Shift+X to open Extensions"
-        Write-Host "     - Search for 'Open Agents Control'"
-        Write-Host "     - Click Install"
-        Write-Host ""
-        Write-ColorOutput "Or run the plugin installation script:" "Cyan"
-        Write-Host "  .\install-openagents-plugin.ps1"
-        Write-Host ""
+        
+        if (-not $Silent) {
+            Write-ColorOutput "Installation Summary:" "Cyan"
+            Write-Host "  Location: $opencodePath"
+            $version = & $opencodePath --version 2>$null
+            Write-Host "  Version:  $version"
+            Write-Host ""
+            Write-ColorOutput "Next Steps:" "Cyan"
+            Write-Host "  1. Launch Open Code from the Start menu or desktop shortcut"
+            Write-Host "  2. Install the Open Agents Control plugin:"
+            Write-Host "     - Press Ctrl+Shift+X to open Extensions"
+            Write-Host "     - Search for 'Open Agents Control'"
+            Write-Host "     - Click Install"
+            Write-Host ""
+            Write-ColorOutput "Or run the plugin installation script:" "Cyan"
+            Write-Host "  .\install-openagents-plugin.ps1"
+            Write-Host ""
+        }
     }
     else {
         Write-ColorOutput "  ✗ Installation verification failed" "Red"
@@ -157,6 +277,22 @@ function Install-OpenCode {
     Write-ColorOutput "==========================================" "Cyan"
     Write-ColorOutput "   Installation Complete!" "Green"
     Write-ColorOutput "==========================================" "Cyan"
+    Write-Host ""
+
+    # Auto-launch Open Code if requested
+    if (-not $NoLaunch -and -not $Silent) {
+        Write-ColorOutput "Would you like to launch Open Code now? (Y/n)" "Cyan"
+        $launch = Read-Host
+        if ($launch -ne "n" -and $launch -ne "N") {
+            Write-Host "Launching Open Code..."
+            Start-Process $opencodePath
+            Write-ColorOutput "  ✓ Open Code launched" "Green"
+        }
+    }
+    elseif (-not $NoLaunch -and $Silent) {
+        # Auto-launch in silent mode
+        Start-Process $opencodePath
+    }
 }
 
 # Main execution

@@ -11,15 +11,35 @@ If you have Git Bash or WSL installed, you can use these bash commands to set up
 git clone <repository-url>
 cd vmcreation
 
-# Run the automated setup (requires Administrator privileges)
+# Run the automated setup (auto-elevates to Administrator)
 # Right-click setup-opencode.bat and select "Run as administrator"
 # Or run from PowerShell as Administrator:
 powershell -ExecutionPolicy Bypass -File .\setup-opencode.bat
+
+# Silent/unattended mode (no prompts):
+powershell -ExecutionPolicy Bypass -File .\setup-opencode.bat -silent
+
+# Silent mode without launching Open Code:
+powershell -ExecutionPolicy Bypass -File .\setup-opencode.bat -silent -nolaunch
+
+# Force reinstall even if already installed:
+powershell -ExecutionPolicy Bypass -File .\setup-opencode.bat -force
 
 # Or install components individually:
 powershell -ExecutionPolicy Bypass -File .\install-opencode.ps1
 powershell -ExecutionPolicy Bypass -File .\install-openagents-plugin.ps1
 ```
+
+### New Automation Features (v2.0)
+
+The enhanced installation scripts now include:
+
+- **Auto-elevation**: Automatically requests administrator privileges if not running as admin
+- **Silent mode**: Run without any prompts using `-Silent` parameter
+- **Auto PATH refresh**: Refreshes environment variables after installation
+- **Desktop shortcut**: Automatically creates a desktop shortcut
+- **Auto-launch**: Option to automatically launch Open Code after installation
+- **Force reinstall**: Use `-Force` to reinstall even if already installed
 
 ## Table of Contents
 
@@ -326,6 +346,7 @@ opencode --uninstall-extension openagents.open-agents-control
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 2.0 | 2026-01-31 | Added auto-elevation, silent mode, PATH refresh, desktop shortcut, auto-launch |
 | 1.0 | 2026-01-31 | Initial version |
 
 ---
