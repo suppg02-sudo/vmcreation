@@ -11,13 +11,46 @@ Automated Ubuntu 24.04 VM creation for Hyper-V with cloud-init SSH configuration
 
 ## Quick Start
 
+### Option 1: Clone and Run VM Creation
+
 1. Clone this repository:
    ```bash
-   git clone <repository-url>
-   cd ubuntu-vm-creator
+   git clone https://github.com/suppg02-sudo/vmcreation.git
+   cd vmcreation
    ```
 
 2. Double-click `run_vmcreator.bat` to create a new VM
+
+### Option 2: Quick Start Script (Recommended)
+
+Download and run the quick-start script which will:
+- Clone the repository automatically
+- Run the VM creation setup
+
+```bash
+# In Command Prompt or PowerShell, run:
+git clone https://github.com/suppg02-sudo/vmcreation.git
+cd vmcreation
+run_vmcreator.bat
+```
+
+### Option 3: Open Code Setup
+
+To install Open Code with the Open Agents Control plugin:
+
+```bash
+# Clone the repository
+git clone https://github.com/suppg02-sudo/vmcreation.git
+cd vmcreation
+
+# Run the automated setup (auto-elevates to Administrator)
+setup-opencode.bat
+
+# Or run silently without prompts:
+powershell -ExecutionPolicy Bypass -File .\setup-opencode.bat -silent
+```
+
+See [`setup-opencode-windows.md`](setup-opencode-windows.md) for detailed installation instructions.
 
    The batch file will:
    - Automatically request administrator privileges
