@@ -6,7 +6,7 @@ Get your Ubuntu VM up and running in under 5 minutes!
 
 **Run the interactive menu:**
 ```batch
-vmmanager.bat
+run_vmcreator.bat
 ```
 
 **Choose option 1: "Create New VM"**
@@ -34,7 +34,7 @@ passwd root
 
 ## 💾 Step 3: Set Up Backups (2 minutes)
 
-**From the menu (vmmanager.bat), choose option 2: "Backup Operations"**
+**From the menu (run_vmcreator.bat), choose option 2: "Backup Operations"**
 
 **Recommended: Option 1 - Restic Backup**
 - Set environment variables (or enter when prompted):
@@ -74,7 +74,7 @@ Your VM is ready with:
 **Can't SSH?**
 - Wait 10-15 minutes for cloud-init
 - Check VM console in Hyper-V Manager
-- Run diagnostics: `vmmanager.bat` → Option 4
+- Run diagnostics: `run_vmcreator.bat` → Option 4
 
 **Backup fails?**
 - Set BACKUP_SERVER_USER and BACKUP_SERVER_PASSWORD
@@ -88,4 +88,4 @@ Your VM is ready with:
 - Check [diagnostics](../diagnostics/) for troubleshooting tools
 - Review [Docker configurations](../docker/) for custom setups
 
-**Need help?** Run `vmmanager.bat` for the interactive menu with guided options!
+**Need help?** Run `run_vmcreator.bat` for the interactive menu with guided options!

@@ -44,7 +44,7 @@ powershell -ExecutionPolicy Bypass -File "create_ubuntu_vm_simple.ps1"
 ### Step 4: Verify Success
 - Script will display success message with SSH command
 - VM should be accessible via SSH
-- Password: `Passw0rd`
+- Password: `UbuntuVM2024!`
 
 ### Step 5: Troubleshooting (if needed)
 - If IP detection fails, run: `powershell -ExecutionPolicy Bypass -File diagnose_vm_ip.ps1`
@@ -56,7 +56,7 @@ powershell -ExecutionPolicy Bypass -File "create_ubuntu_vm_simple.ps1"
 ### 1. Initial SSH Connection
 ```bash
 ssh root@<VM_IP_ADDRESS>
-# Password: Passw0rd
+# Password: UbuntuVM2024!
 ```
 
 ### 2. Verify Cloud-Init Completion
@@ -158,7 +158,7 @@ Remove-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\VMSMP\Paramet
 
 ### Default Credentials
 - **Username**: `root`
-- **Password**: `Passw0rd`
+- **Password**: `UbuntuVM2024!`
 - **Change immediately after first login**
 
 ### Network Security

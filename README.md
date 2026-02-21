@@ -86,7 +86,7 @@ powershell -ExecutionPolicy Bypass -File .\vm-creation\create_ubuntu_vm_clean.ps
 ## Default Credentials
 
 - **Username:** root
-- **Password:** Passw0rd (change immediately after first login)
+- **Password:** UbuntuVM2024! (change immediately after first login)
 
 ## VM Configuration
 
@@ -147,7 +147,21 @@ If you are an AI coding assistant (like Kilo Code, GitHub Copilot, etc.) and hav
 2. Verify QEMU tools are installed at `C:\Program Files\qemu\qemu-img.exe`
    - If not found, inform the user to install from: https://qemu.weilnetz.de/w64/
 
-3. Verify Git is installed:
+3. Verify Virtual Switch exists:
+   ```powershell
+   Get-VMSwitch -Name "New Virtual Switch"
+   ```
+   If it doesn't exist, create it:
+   ```powershell
+   New-VMSwitch -Name "New Virtual Switch" -SwitchType Internal
+   ```
+
+4. Verify Disk Space (>50GB free):
+   ```powershell
+   Get-PSDrive C | Select-Object Free
+   ```
+
+5. Verify Git is installed:
    ```powershell
    Get-Command git
    ```
@@ -192,13 +206,13 @@ If you are an AI coding assistant (like Kilo Code, GitHub Copilot, etc.) and hav
    ```powershell
    ssh root@<VM_IP>
    ```
-   Default password: Passw0rd (change immediately after first login)
+   Default password: UbuntuVM2024! (change immediately after first login)
 
 ### Troubleshooting
 - If Hyper-V is not enabled, run the enable command and restart the system
 - If QEMU tools are missing, inform the user to install them
 - If the script fails, check the log file for specific errors
-- If IP detection fails, use Hyper-V Manager to find the VM's IP address
+- If IP detection fails, use Hyper-V Manager to find the VM's IP address or run `arp -a | findstr <MAC_ADDRESS>`
 
 ### Expected Output
 The script will create a VM with:

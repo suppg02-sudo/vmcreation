@@ -43,6 +43,21 @@ $CidVHDXPath = "$VMPath\cidata.vhdx"
 $DataVHDXPath = "$VMPath\data.vhdx"
 $SwitchName = "New Virtual Switch"
 
+# Validate virtual switch
+$vmSwitch = Get-VMSwitch -Name $SwitchName -ErrorAction SilentlyContinue
+if (!$vmSwitch) {
+    Write-Host "Warning: Virtual switch '$SwitchName' not found." -ForegroundColor Yellow
+    $allSwitches = Get-VMSwitch
+    if ($allSwitches.Count -gt 0) {
+        $SwitchName = $allSwitches[0].Name
+        Write-Host "Using first available switch: '$SwitchName'" -ForegroundColor Cyan
+    } else {
+        Write-Error "No virtual switches found in Hyper-V. Please create one first."
+        Write-Host "You can create one with: New-VMSwitch -Name 'New Virtual Switch' -SwitchType Internal" -ForegroundColor Green
+        exit 1
+    }
+}
+
 # Check for QEMU installation
 $QemuImgPath = "C:\Program Files\qemu\qemu-img.exe"
 if (!(Test-Path $QemuImgPath)) {
