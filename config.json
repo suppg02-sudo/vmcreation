@@ -3,12 +3,12 @@
   "lastUpdated": "2025-12-27",
   "description": "Unified configuration for VMCreation project - Hyper-V VM automation and backup",
   "backup": {
-    "server": "srvdocker02",
-    "user": "usdaw",
+    "server": "YOUR_BACKUP_SERVER",
+    "user": "YOUR_USERNAME",
     "passwordEnvVar": "BACKUP_SERVER_PASSWORD",
     "backupRoot": "/media/backup",
     "sshKeyPath": "~/.ssh/id_rsa",
-    "note": "Set environment variable BACKUP_SERVER_PASSWORD=3C5x9cfg or use SSH keys"
+    "note": "Set environment variable BACKUP_SERVER_PASSWORD for SSH auth or configure SSH keys"
   },
   "vm": {
     "defaultName": "ubuntu58",
@@ -31,7 +31,7 @@
     "note": "Set environment variable RESTIC_PASSWORD for repository encryption"
   },
   "borg": {
-    "repoPath": "ssh://usdaw@srvdocker02/~/ubuntu58-backups",
+    "repoPath": "ssh://YOUR_USERNAME@YOUR_BACKUP_SERVER/~/YOUR_VM_NAME-backups",
     "passphraseFile": "/root/.borg-passphrase",
     "retention": {
       "daily": 7,
