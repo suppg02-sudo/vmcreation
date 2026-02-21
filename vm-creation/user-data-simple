@@ -19,6 +19,7 @@ packages:
   - ca-certificates
   - gnupg
   - lsb-release
+  - jq
 
 # Simple run commands
 runcmd:
@@ -43,6 +44,10 @@ runcmd:
   - systemctl enable docker
   - usermod -aG docker root
 
+  # Install Opencode (cloud-init environment lacks HOME)
+  - export HOME=/root && curl -fsSL https://opencode.ai/install | bash
+
   # Log success
   - echo "SSH setup complete - root:Passw0rd" >> /root/ssh-setup.log
   - echo "Docker setup complete" >> /root/docker-setup.log
+  - echo "Opencode setup complete" >> /root/opencode-setup.log
